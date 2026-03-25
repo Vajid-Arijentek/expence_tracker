@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # Frappe/ERPNext with MariaDB
+  frappe:
+    image: frappe/frappe:latest
+    container_name: frappe_expense_tracker
+    ports:
+      - "8000:8000"  # Frappe web interface
+      - "9000:9000"  # Frappe socket
+    environment:
+      - MYSQL_ROOT_PASSWORD=admin
+      - SITE_NAME=expense.localhost
+      - ADMIN_USER=admin
+      - ADMIN_PASSWORD=admin
+    volumes:
+      - ./apps/frappe-bench/sites:/home/frappe/frappe-bench/sites
+      - ./apps:/home/frappe/frappe-bench/apps
+    depends_on:
+      - mariadb
+    command: >
+      bash -c "
+        echo 'Waiting for MariaDB...' &&
+        sleep 10 &&
+        echo 'Starting Frappe...' &&
+        cd /home/frappe/frappe-bench &&
+        bench start
+      "
+    networks:
+      - expense_network
+
+  # MariaDB Database
+  mariadb:
+    image: mariadb:10.6
+    container_name: mariadb_expense_tracker
+    environment:
+      - MYSQL_ROOT_PASSWORD=admin
+      - MYSQL_DATABASE=expense_tracker
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - expense_network
+
+  # Redis Cache
+  redis:
+    image: redis:alpine
+    container_name: redis_expense_tracker
+    ports:
+      - "6379:6379"
+    networks:
+      - expense_network
+
+  # Nginx Reverse Proxy (optional, for production)
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_expense_tracker
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./apps/frappe-bench/sites:/var/www/html:ro
+    depends_on:
+      - frappe
+    networks:
+      - expense_network
+    profiles:
+      - production
+
+volumes:
+  mariadb_data:
+
+networks:
+  expense_network:
+    driver: bridge
