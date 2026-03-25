@@ -1,0 +1,5 @@
+# Expense Tracker Requirements
+# Frappe Framework dependencies are managed by bench
+# This file is for any additional Python dependencies if needed
+
+# No additional dependencies required for basic functionality

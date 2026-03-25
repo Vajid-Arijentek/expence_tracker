@@ -1,0 +1,21 @@
+{
+  "name": "expense_tracker",
+  "version": "0.0.1",
+  "description": "Simple Daily Expense Tracking Application for Frappe",
+  "main": "expense_tracker/__init__.py",
+  "scripts": {
+    "lint": "eslint expense_tracker/public/js",
+    "build": "npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/expense_tracker.git"
+  },
+  "keywords": [
+    "frappe",
+    "expense",
+    "tracker"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
