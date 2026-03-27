@@ -1,6 +1,10 @@
 # Expense Tracker
 
-A comprehensive daily expense tracking application built for the Frappe Framework.
+[![Frappe Framework](https://img.shields.io/badge/Frappe-v15-blue)](https://frappeframework.com)
+[![Python](https://img.shields.io/badge/Python-3.10%2B--3.11-yellow)](https://python.org)
+[![License](https://img.shields.io/badge/License-MIT-green)](license.txt)
+
+A comprehensive daily expense tracking application built for the Frappe Framework v15.
 
 ## Overview
 
@@ -8,11 +12,21 @@ Expense Tracker is a Frappe application that helps individuals and organizations
 
 ## Version
 
-**0.0.1**
+**0.0.1** - Frappe v15 Compatible
 
 ## License
 
-MIT License - Copyright (c) 2025 Expense Tracker
+MIT License - Copyright (c) 2026 Expense Tracker
+
+## Compatibility
+
+| Component | Version |
+|-----------|---------|
+| Frappe Framework | v15.x |
+| ERPNext | Not required (standalone app) |
+| Python | 3.10 - 3.11 |
+| MariaDB | 10.6+ |
+| Frappe Docker | ✅ Compatible |
 
 ## Features
 
@@ -27,12 +41,14 @@ MIT License - Copyright (c) 2025 Expense Tracker
 - **Email Notifications**: Automated daily summaries and monthly reports
 - **Budget Alerts**: Warnings when budget limits are approached or exceeded
 - **Quick Add**: Fast expense entry through dialog interface
+- **REST API**: Full API endpoints for integration
 
 ## Requirements
 
-- Frappe Framework (installed via bench)
-- Python 3.x
-- MariaDB/MySQL database
+- Frappe Framework v15.x
+- Python 3.10 or 3.11
+- MariaDB 10.6+ (or MySQL 8.0+)
+- Node.js 18+ (for bench build)
 
 ## Installation
 
@@ -40,10 +56,42 @@ MIT License - Copyright (c) 2025 Expense Tracker
 
 ```bash
 cd /path/to/frappe-bench
-bench get-app expense_tracker /path/to/expense_tracker
+
+# Option 1: Clone from GitHub (version-15 branch)
+bench get-app https://github.com/Vajid-Arijentek/expence_tracker.git --branch version-15
+
+# Option 2: Clone main branch (also v15 compatible)
+bench get-app https://github.com/Vajid-Arijentek/expence_tracker.git
+
+# Install the app
 bench install-app expense_tracker
+
+# Build and restart
 bench build
 bench restart
+```
+
+### Using frappe_docker
+
+Add to your `compose.yaml` or install via bench:
+
+```bash
+# Inside your frappe_docker container
+bench get-app https://github.com/Vajid-Arijentek/expence_tracker.git --branch version-15
+bench install-app expense_tracker
+bench new-site your-site.local
+bench --site your-site.local install-app expense_tracker
+```
+
+### Development Setup
+
+```bash
+# Clone for development
+git clone https://github.com/Vajid-Arijentek/expence_tracker.git
+cd expence_tracker
+
+# Link to existing bench
+bench get-app expense_tracker /path/to/expence_tracker
 ```
 
 ## Project Structure
@@ -51,15 +99,17 @@ bench restart
 ```
 expense_tracker/
 ├── expense_tracker/              # Main application package
-│   ├── __init__.py               # Package initialization
+│   ├── __init__.py               # Package initialization (v0.0.1)
 │   ├── hooks.py                  # Application hooks and configuration
 │   ├── expense_events.py         # DocType event handlers
 │   ├── tasks.py                  # Scheduled tasks
 │   ├── notifications.py          # Notification configuration
 │   │
 │   ├── api/                      # API endpoints
+│   │   ├── __init__.py           # API helper functions
 │   │   └── expense_api.py        # REST API for expense operations
 │   │
+│   ├── config/                   # Configuration files
 │   ├── public/                   # Public assets
 │   │   ├── js/
 │   │   │   └── expense_tracker.js  # Client-side JavaScript
@@ -79,9 +129,12 @@ expense_tracker/
 │                   ├── expense_category.json
 │                   └── expense_category.py
 │
-├── package.json                  # NPM configuration
-├── requirements.txt              # Python dependencies
-└── license.txt                   # MIT License
+├── modules.txt                   # Frappe modules list
+├── setup.py                      # Python package configuration
+├── pyproject.toml                # Modern Python packaging
+├── requirements.txt              # Python dependencies (Frappe v15)
+├── license.txt                   # MIT License
+└── README.md                     # This file
 ```
 
 ## DocTypes
@@ -116,26 +169,26 @@ Categories for organizing expenses:
 
 ## API Endpoints
 
-### GET `/api/method/expense_tracker.api.expense_api.get_expenses`
+### GET `/api/method/expense_tracker.api.get_expenses`
 Retrieve expenses with optional filters.
 
 **Query Parameters:**
 ```json
 {
-  "from_date": "2025-01-01",    // Optional: Start date filter
-  "to_date": "2025-12-31",      // Optional: End date filter
+  "from_date": "2026-01-01",    // Optional: Start date filter
+  "to_date": "2026-12-31",      // Optional: End date filter
   "category": "Food",           // Optional: Category filter
   "status": "Approved"          // Optional: Status filter
 }
 ```
 
-### POST `/api/method/expense_tracker.api.expense_api.create_expense`
+### POST `/api/method/expense_tracker.api.create_expense`
 Create a new expense record.
 
 **Request Body:**
 ```json
 {
-  "expense_date": "2025-01-15",
+  "expense_date": "2026-03-27",
   "expense_category": "Food",
   "amount": 25.50,
   "description": "Lunch",
@@ -144,7 +197,7 @@ Create a new expense record.
 }
 ```
 
-### GET `/api/method/expense_tracker.api.expense_api.get_dashboard_data`
+### GET `/api/method/expense_tracker.api.get_dashboard_data`
 Get dashboard summary statistics.
 
 **Returns:**
@@ -161,12 +214,18 @@ Get dashboard summary statistics.
 }
 ```
 
-### GET `/api/method/expense_tracker.api.expense_api.export_to_csv`
+### GET `/api/method/expense_tracker.api.export_to_csv`
 Export expenses to CSV format.
 
 **Query Parameters:**
 - `start_date`: Start date (YYYY-MM-DD)
 - `end_date`: End date (YYYY-MM-DD)
+
+### GET `/api/method/expense_tracker.api.get_budget_status`
+Check budget status for a category.
+
+**Query Parameters:**
+- `category`: Expense category name
 
 ## Scheduled Tasks
 
@@ -198,17 +257,32 @@ When submitting an expense, the system automatically:
 
 ## Development
 
-### Linting
+### Running Bench Commands
 
 ```bash
-npm run lint
+# Get shell in bench container (frappe_docker)
+docker compose exec backend bash
+
+# Install dependencies
+bench pip install -r apps/expense_tracker/requirements.txt
+
+# Build assets
+bench build --app expense_tracker
+
+# Restart bench
+bench restart
 ```
 
-### Building
+## Changelog
 
-```bash
-npm run build
-```
+### v0.0.1 (2026-03-27)
+- Initial release for Frappe v15
+- Expense tracking with categories
+- Budget management per category
+- REST API endpoints
+- CSV export functionality
+- Scheduled reports
+- Frappe Docker compatibility
 
 ## Application Configuration (hooks.py)
 
@@ -222,3 +296,8 @@ The application is configured through `hooks.py` with:
 ## Support
 
 For support, email: support@example.com
+
+## Repository
+
+- **GitHub**: https://github.com/Vajid-Arijentek/expence_tracker
+- **Issue Tracker**: https://github.com/Vajid-Arijentek/expence_tracker/issues
